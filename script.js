@@ -12,7 +12,7 @@ var currentUvindex= $("#uv-index");
 var sCity=[];
 // searches the city to see if it exists in the entries from local storage
 function find(c){
-    for (var i=0; i<sCity.length; i++){
+    for (var i = 0; i < sCity.length; i++){
         if(c === sCity[i]){
             return -1;
         }
@@ -44,9 +44,9 @@ function currentWeather(city){
         var weathericon= response.weather[0].icon;
         var iconurl="https://openweathermap.org/img/wn/"+weathericon +"@2x.png";
         var date=new Date(response.dt*1000).toLocaleDateString();
-        //parse the response for name of city and concanatig the date and icon.
+        //parse the response for name of city and concatenate the date and icon.
         $(currentCity).html(response.name + " ("+date+")" + "<img src="+iconurl+">");
-        //parse the response to display the current temperature.
+        
         //convert to fahrenheit
 
         var tempF = (response.main.temp - 273.15) * 1.80 + 32;
@@ -58,7 +58,7 @@ function currentWeather(city){
         var windsmph=(ws*2.237).toFixed(1);
         $(currentWSpeed).html(windsmph+"MPH");
         //display UVIndex.
-        //By Geographic coordinates method and using appid and coordinates as a parameter we are going build our uv query url inside the function below.
+        //use geographic coordinates method and using appid and coordinates as a parameter we are going build our uv query url inside the function below.
         UVIndex(response.coord.lon,response.coord.lat);
         forecast(response.id);
         if(response.cod==200){
@@ -78,23 +78,46 @@ function currentWeather(city){
                 }
             }
         }
+        //dynamically change background color or UV index based on what it is
+        if (UVIndex <= 2) {
+            document.getElementById()
+        }
 
     });
 }
-    // This function returns the UVIindex response.
+    //this function returns the UVIindex response.
 function UVIndex(ln,lt){
     //lets build the url for uvindex.
-    var uvURL="https://api.openweathermap.org/data/2.5/uvi?appid="+ APIKey+"&lat="+lt+"&lon="+ln;
+    var uvURL = "https://api.openweathermap.org/data/2.5/uvi?appid="+ APIKey+"&lat="+lt+"&lon="+ln;
     $.ajax({
             url:uvURL,
             method:"GET"
             }).then(function(response){
                 $(currentUvindex).html(response.value);
             });
-}
+
+            //dynamically change background color or UV index based on what it is
+        if (currentUvindex <= 2) {
+            document.getElementById("uvcolor").style.background = "green"
+            document.getElementById("uvcolor").style.color = "white"
+        }
+        if (currentUvindex >= 3 && currentUvindex <= 5) {
+            document.getElementById("uvcolor").style.background = "yellow"
+            document.getElementById("uvcolor").style.color = "black"
+        }
+        if (currentUvindex >= 6 && currentUvindex <= 7) {
+            document.getElementById("uvcolor").style.background = "orange"
+            document.getElementById("uvcolor").style.color = "black"
+        }
+        if (currentUvindex >= 8 && currentUvindex <= 10) {
+            document.getElementById("uvcolor").style.background = "red"
+            document.getElementById("uvcolor").style.color = "white"
+        }
+        }
+
     
-//display the 5 days forecast for the current city.
-function forecast(cityid){
+    //display the 5 days forecast for the current city.
+    function forecast(cityid){
     var dayover= false;
     var queryforcastURL="https://api.openweathermap.org/data/2.5/forecast?id="+cityid+"&appid="+APIKey;
     $.ajax({
@@ -102,7 +125,7 @@ function forecast(cityid){
         method:"GET"
     }).then(function(response){
         
-        for (i=0;i<5;i++){
+        for (i = 0;i < 5;i ++){
             var date= new Date((response.list[((i+1)*8)-1].dt)*1000).toLocaleDateString();
             var iconcode= response.list[((i+1)*8)-1].weather[0].icon;
             var iconurl="https://openweathermap.org/img/wn/"+iconcode+".png";
@@ -119,14 +142,14 @@ function forecast(cityid){
     });
 }
 
-//Daynamically add the passed city on the search history
+//dynamically add the passed city on the search history
 function addToList(c){
     var listEl= $("<li>"+c+"</li>");
     $(listEl).attr("class","list-group-item");
     $(listEl).attr("data-value",c);
     $(".list-group").append(listEl);
 }
-// display the past search again when the list group item is clicked in search history
+//display the past search again when the list group item is clicked in search history
 function invokePastSearch(event){
     var liEl=event.target;
     if (event.target.matches("li")){
@@ -136,7 +159,7 @@ function invokePastSearch(event){
 
 }
 
-// render function
+//render function
 function loadlastCity(){
     $("ul").empty();
     var sCity = JSON.parse(localStorage.getItem("cityname"));
@@ -150,7 +173,7 @@ function loadlastCity(){
     }
 
 }
-//Clear the search history from the page
+//clear the search history from the page
 function clearHistory(event){
     event.preventDefault();
     sCity=[];
@@ -158,7 +181,7 @@ function clearHistory(event){
     document.location.reload();
 
 }
-//Click Handlers
+//click Handlers
 $("#search-button").on("click",displayWeather);
 $(document).on("click",invokePastSearch);
 $(window).on("load",loadlastCity);
